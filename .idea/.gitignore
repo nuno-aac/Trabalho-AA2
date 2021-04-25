@@ -1,0 +1,9 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Datasource local storage ignored files
+/../../../../../../../../../../:\Users\GL502V\Documents\Univ\Mestrado\2ºSemestre\AAII\Trabalho\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+../ecpred_uniprot_uniref_90.csv
