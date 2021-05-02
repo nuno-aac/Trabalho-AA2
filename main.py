@@ -29,13 +29,26 @@ def seq2wordcount_vec(seqs):
     flat_threemers = np.array(seqs, dtype=object).flatten()
     wordcount = {}
     for key in threemersidx:
-        wordcount[key] = 0
+        wordcount[key] = [0.0] * 100
     for t in flat_threemers:
         try:
             wordcount[t] = np.add(wordcount[t], embeddings.iloc[threemersidx[t]])
         except:
             wordcount['<unk>'] = np.add(wordcount['<unk>'], embeddings.iloc[threemersidx['<unk>']])
     return wordcount
+
+
+def seq2fixed_vec_matrix(seqs):
+    flat_threemers = np.array(seqs, dtype=object).flatten()
+    vec_array = []
+    for t in flat_threemers:
+        try:
+            vec_array.append(embeddings.iloc[threemersidx[t]])
+        except:
+            vec_array.append(embeddings.iloc[threemersidx['<unk>']])
+    while len(vec_array) <= 1498:
+        vec_array.append([0.0]*100)
+    return vec_array
 
 
 #  Read datasets
@@ -57,12 +70,6 @@ print(embeddings)
 
 data = data[data.get('sequence').notna()]  # Removing null values from sequence column
 sequences = data.get('sequence')
-
-maxi = 0
-for sequen in sequences:
-    if len(sequen) > 1500:
-        maxi += 1
-print("max sequence length: " + str(maxi))
 
 subsequences = sequences2subsequences(sequences)
 
