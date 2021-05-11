@@ -15,7 +15,7 @@ def sequences2subsequences(seq):
 
 
 def seq2fixed_length_vec(seqs):
-    flat_threemers = np.array(seqs, dtype=object).flatten()
+    flat_threemers = [item for sublist in seqs for item in sublist]
     vec = np.array([0.0] * 100)
     for t in flat_threemers:
         try:
@@ -26,33 +26,33 @@ def seq2fixed_length_vec(seqs):
 
 
 def seq2wordcount_vec(seqs):
-    flat_threemers = np.array(seqs, dtype=object).flatten()
-    wordcount = {}
-    for key in threemersidx:
-        wordcount[key] = [0.0] * 100
+    flat_threemers = [item for sublist in seqs for item in sublist]
+    wordcount = []
+    for key, val in threemersidx.items():
+        wordcount[val] = [0.0] * 100
     for t in flat_threemers:
         try:
-            wordcount[t] = np.add(wordcount[t], embeddings.iloc[threemersidx[t]])
+            wordcount[threemersidx[t]] = np.add(wordcount[threemersidx[t]], embeddings.iloc[threemersidx[t]])
         except:
-            wordcount['<unk>'] = np.add(wordcount['<unk>'], embeddings.iloc[threemersidx['<unk>']])
+            wordcount[threemersidx['<unk>']] = np.add(wordcount[threemersidx['<unk>']], embeddings.iloc[threemersidx['<unk>']])
     return wordcount
 
 
 def seq2fixed_vec_matrix(seqs):
-    flat_threemers = np.array(seqs, dtype=object).flatten()
+    flat_threemers = [item for sublist in seqs for item in sublist]
     vec_array = []
     for t in flat_threemers:
         try:
-            vec_array.append(embeddings.iloc[threemersidx[t]])
+            vec_array.append(embeddings.iloc[threemersidx[t]].to_numpy())
         except:
-            vec_array.append(embeddings.iloc[threemersidx['<unk>']])
-    while len(vec_array) <= 1498:
-        vec_array.append([0.0]*100)
-    return vec_array
+            vec_array.append(embeddings.iloc[threemersidx['<unk>']].to_numpy())
+    while len(vec_array) < 698:
+        vec_array.append(np.array([0.0]*100))
+    return np.array(vec_array)
 
 
 #  Read datasets
-data = pd.read_csv("ecpred_uniprot_uniref_90.csv").head(50)
+data = pd.read_csv("ecpred_uniprot_uniref_90.csv").head(5000)
 embeddings = pd.read_csv("protVec_100d_3grams.csv", sep='\\t', engine='python', header=None)
 
 #  Build threemer dictionary
@@ -69,13 +69,22 @@ embeddings = embeddings.astype(float)
 print(embeddings)
 
 data = data[data.get('sequence').notna()]  # Removing null values from sequence column
+data = data[data['sequence'].apply(lambda x: len(x) < 700)]  # Removing sequences with length > 1500
 sequences = data.get('sequence')
 
 subsequences = sequences2subsequences(sequences)
 
 data['subsequences'] = subsequences
 
-print(data)
+# print(data['subsequences'].apply(seq2fixed_length_vec))
+# print(data['subsequences'].apply(seq2wordcount_vec))
+# print(data['subsequences'].apply(seq2fixed_vec_matrix))
+data['vectors'] = data['subsequences'].apply(seq2fixed_vec_matrix)
 
-print(data['subsequences'].apply(seq2fixed_length_vec))
-print(data['subsequences'].apply(seq2wordcount_vec))
+print(data.iloc[0].get('vectors'))
+
+data = data[["uniref_90", "ec_number", "vectors"]]
+
+pd.to_pickle(data, './data.pkl')
+
+
