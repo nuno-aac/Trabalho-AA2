@@ -28,14 +28,14 @@ def seq2fixed_length_vec(seqs):
 def seq2wordcount_vec(seqs):
     flat_threemers = [item for sublist in seqs for item in sublist]
     wordcount = []
-    for key, val in threemersidx.items():
-        wordcount[val] = [0.0] * 100
+    for val in range(len(threemersidx)):
+        wordcount.append([0.0] * 100)
     for t in flat_threemers:
         try:
             wordcount[threemersidx[t]] = np.add(wordcount[threemersidx[t]], embeddings.iloc[threemersidx[t]])
         except:
             wordcount[threemersidx['<unk>']] = np.add(wordcount[threemersidx['<unk>']], embeddings.iloc[threemersidx['<unk>']])
-    return wordcount
+    return np.array(wordcount)
 
 
 def seq2fixed_vec_matrix(seqs):
@@ -52,7 +52,7 @@ def seq2fixed_vec_matrix(seqs):
 
 
 #  Read datasets
-data = pd.read_csv("ecpred_uniprot_uniref_90.csv").head(5000)
+data = pd.read_csv("ecpred_uniprot_uniref_90.csv").head(400)
 embeddings = pd.read_csv("protVec_100d_3grams.csv", sep='\\t', engine='python', header=None)
 
 #  Build threemer dictionary
@@ -79,12 +79,12 @@ data['subsequences'] = subsequences
 # print(data['subsequences'].apply(seq2fixed_length_vec))
 # print(data['subsequences'].apply(seq2wordcount_vec))
 # print(data['subsequences'].apply(seq2fixed_vec_matrix))
-data['vectors'] = data['subsequences'].apply(seq2fixed_vec_matrix)
+data['vectors'] = data['subsequences'].apply(seq2wordcount_vec)
 
 print(data.iloc[0].get('vectors'))
 
 data = data[["uniref_90", "ec_number", "vectors"]]
 
-pd.to_pickle(data, './data.pkl')
+pd.to_pickle(data, './data_wordcount.pkl')
 
 
