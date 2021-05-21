@@ -2,9 +2,10 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from tensorflow.keras import models
-from tensorflow.keras.layers import LSTM, Dense
+from tensorflow.keras.layers import Dense
 from tensorflow.python.keras import Input
-from tensorflow.python.keras.layers import Conv1D, Flatten
+from tensorflow.python.keras.layers import Conv1D, Flatten, Dropout, MaxPooling1D
+import matplotlib.pyplot as plt
 
 
 def get_first_dig(num):
@@ -29,11 +30,10 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
 
 model = models.Sequential()
 model.add(Input(shape=(698, 100), dtype='float32', name='main_input'))
-model.add(Conv1D(32, 3))
-model.add(Conv1D(64, 3))
-model.add(Conv1D(64, 3))
+model.add(Conv1D(32, 3, activation='relu'))
+model.add(MaxPooling1D(3))
 model.add(Flatten())
-model.add(Dense(64, activation='relu'))
+model.add(Dense(32, activation='relu'))
 model.add(Dense(8, activation='softmax'))
 model.compile(optimizer='rmsprop',
               loss='sparse_categorical_crossentropy',
@@ -44,11 +44,24 @@ model.summary()
 print('EVAL')
 
 history = model.fit(x_train, y_train,
-                    epochs=10,
+                    epochs=20,
                     batch_size=128,
                     validation_split=0.2)
 
 history_dict = history.history
+
+acc_values = history_dict['acc']
+val_acc_values = history_dict['val_acc']
+epochs = range(1, len(acc_values) + 1)
+
+plt.plot(epochs, acc_values, 'bo', label='Training acc')
+plt.plot(epochs, val_acc_values, 'b', label='Validation acc')
+plt.title('Training and validation accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Acc')
+plt.legend()
+plt.show()
+
 
 test_loss, test_acc = model.evaluate(x_test,  y_test, verbose=2)
 

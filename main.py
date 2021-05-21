@@ -52,7 +52,7 @@ def seq2fixed_vec_matrix(seqs):
 
 
 #  Read datasets
-data = pd.read_csv("ecpred_uniprot_uniref_90.csv").head(400)
+data = pd.read_csv("ecpred_uniprot_uniref_90.csv").head(11000)
 embeddings = pd.read_csv("protVec_100d_3grams.csv", sep='\\t', engine='python', header=None)
 
 #  Build threemer dictionary
@@ -79,12 +79,12 @@ data['subsequences'] = subsequences
 # print(data['subsequences'].apply(seq2fixed_length_vec))
 # print(data['subsequences'].apply(seq2wordcount_vec))
 # print(data['subsequences'].apply(seq2fixed_vec_matrix))
-data['vectors'] = data['subsequences'].apply(seq2wordcount_vec)
+data['vectors'] = data['subsequences'].apply(seq2fixed_vec_matrix)
 
 print(data.iloc[0].get('vectors'))
 
 data = data[["uniref_90", "ec_number", "vectors"]]
 
-pd.to_pickle(data, './data_wordcount.pkl')
+pd.to_pickle(data, './data.pkl')
 
 
