@@ -1,11 +1,30 @@
+import os
+
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from tensorflow.keras import models
 from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.python.keras import Input
-from tensorflow.python.keras.layers import Bidirectional
+from tensorflow.python.keras.layers import Bidirectional, Dropout, Flatten
 import matplotlib.pyplot as plt
+import tensorflow as tf
+
+
+os.environ["CUDA_VISIBLE_DEVICES"] = '3'
+gpus = tf.config.experimental.list_physical_devices('GPU')
+tf.debugging.set_log_device_placement(True)
+if gpus:
+    try:
+        # Currently, memory growth needs to be the same across GPUs
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+            # tf.config.experimental.set_visible_devices(gpus[:1], 'GPU')
+        logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+        print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+    except RuntimeError as e:
+        # Memory growth must be set before GPUs have been initialized
+        print(e)
 
 
 def get_first_dig(num):
@@ -13,7 +32,7 @@ def get_first_dig(num):
     return int(r[0])
 
 
-data = pd.read_pickle("data.pkl")
+data = pd.read_pickle("parsed_data/data.pkl")
 
 x = data['vectors'].to_numpy()
 x = np.array(x.tolist())
@@ -26,11 +45,8 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
 
 model = models.Sequential()
 model.add(Input(shape=(698, 100), dtype='float32', name='main_input'))
-model.add(Bidirectional(LSTM(32,
-                        return_sequences=True)))
-model.add(Bidirectional(LSTM(32,
-                        return_sequences=True)))
-model.add(Bidirectional(LSTM(64)))
+model.add(Bidirectional(LSTM(128)))
+model.add(Dropout(0.5))
 model.add(Dense(8, activation='softmax'))
 model.compile(optimizer='rmsprop',
               loss='sparse_categorical_crossentropy',
@@ -39,8 +55,8 @@ model.compile(optimizer='rmsprop',
 model.summary()
 
 history = model.fit(x_train, y_train,
-                    epochs=10,
-                    batch_size=64,
+                    epochs=80,
+                    batch_size=128,
                     validation_split=0.2)
 
 history_dict = history.history

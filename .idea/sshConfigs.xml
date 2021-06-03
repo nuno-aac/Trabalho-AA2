@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SshConfigs">
+    <configs>
+      <sshConfig authType="PASSWORD" host="tesla.di.uminho.pt" id="f48b5f97-e11c-48b4-ac72-0bed02c01cfa" port="22" nameFormat="DESCRIPTIVE" username="amsmiei" />
+    </configs>
+  </component>
+</project>

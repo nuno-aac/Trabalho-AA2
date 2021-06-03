@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="14e37e43-1594-4aa8-a635-597d2189e9b0" name="um" url="http://tesla.di.uminho.pt">
+        <fileTransfer rootFolder="/home/amsmiei" accessType="SFTP" host="tesla.di.uminho.pt" port="22" sshConfigId="f48b5f97-e11c-48b4-ac72-0bed02c01cfa" sshConfig="amsmiei@tesla.di.uminho.pt:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
