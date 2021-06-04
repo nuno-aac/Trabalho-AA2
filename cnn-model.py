@@ -26,6 +26,7 @@ if gpus:
         # Memory growth must be set before GPUs have been initialized
         print(e)
 
+
 def get_first_dig(num):
     r = num.split('.')
     return int(r[0])
@@ -38,8 +39,6 @@ data = pd.read_pickle("parsed_data/data.pkl")
 print(data)
 
 x = data['vectors'].to_numpy()
-x = np.array(x.tolist())
-x = x.astype('float32')
 
 y = data['ec_number'].apply(get_first_dig).to_numpy()
 

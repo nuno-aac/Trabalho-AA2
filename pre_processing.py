@@ -78,7 +78,7 @@ def handle_ec_number(ec_number, ecn_level):
 
 
 #  Read datasets
-data = pd.read_csv("ecpred_uniprot_uniref_90.csv").head(50)
+data = pd.read_csv("ecpred_uniprot_uniref_90.csv").head(500)
 embeddings = pd.read_csv("protVec_100d_3grams.csv", sep='\\t', engine='python', header=None)
 
 '''
@@ -92,20 +92,6 @@ for row in data['ec_number']:
 
 print(firstdig)
 5/0
-'''
-
-#  Build threemer dictionary
-embeddings[100] = embeddings[100].apply(lambda elem: elem[:-1])
-threemers = embeddings.get(0)
-vocab = {}
-for i, kmer in enumerate(threemers):
-    vocab[kmer[1:]] = embeddings.iloc[i][1:].to_numpy(dtype="float32")
-# print(threemersidx)
-print(len(vocab))
-print((vocab['AAA']))
-
-'''
-pd.to_pickle(data, 'parsed_data/data1-2.pkl')
 '''
 
 
@@ -123,15 +109,25 @@ def parse_dataset(dataset, vocabulary, representation='matrix', maxlen=700, ecn_
         dataset['vectors'] = matrix
         dataset = dataset[["ec_number", "vectors"]]
     elif representation == 'vector':
-        one_d_vecs = dataset['subsequences'].apply(lambda x: seq2fixed_vec_matrix(x, vocabulary))
+        one_d_vecs = dataset['subsequences'].apply(lambda x: seq2fixed_length_vec(x, vocabulary))
         dataset = dataset[["ec_number"]]
         dataset = dataset.join(one_d_vecs)
-
     else:
         raise ValueError('Insert valid representation: "vector", "matrix" or "vocabulary"')
+
     dataset['ec_number'] = dataset['ec_number'].apply(lambda x: handle_ec_number(x, ecn_level))
     dataset = dataset[dataset.get('ec_number').notna()]
     return dataset
 
 
-print(parse_dataset(data, vocab, ecn_level=2, representation='vocabulary'))
+#  Build threemer dictionary
+embeddings[100] = embeddings[100].apply(lambda elem: elem[:-1])
+threemers = embeddings.get(0)
+vocab = {}
+for i, kmer in enumerate(threemers):
+    vocab[kmer[1:]] = embeddings.iloc[i][1:].to_numpy(dtype="float32")
+
+df = parse_dataset(data, vocab, ecn_level=2, representation='matrix')
+
+pd.to_pickle(df, 'parsed_data/data-micro.pkl')
+
