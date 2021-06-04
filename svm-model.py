@@ -11,7 +11,7 @@ def get_first_dig(num):
 data = pd.read_pickle("parsed_data/data1-2.pkl")
 
 print(data)
-x = data.iloc[:, 2:]
+x = data.iloc[:, 1:]
 
 y = data['ec_number'].apply(get_first_dig).to_numpy()
 

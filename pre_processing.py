@@ -83,9 +83,8 @@ def handle_ec_number(ec_number, ecn_level):
 
 
 #  Read datasets
-data = pd.read_csv("ecpred_uniprot_uniref_90.csv").sample(n=24000)
+data = pd.read_csv("ecpred_uniprot_uniref_90.csv")
 embeddings = pd.read_csv("protVec_100d_3grams.csv", sep='\\t', engine='python', header=None)
-
 
 
 def parse_dataset(dataset, vocabulary, representation='matrix', maxlen=700, ecn_level=1):
@@ -120,20 +119,17 @@ vocab = {}
 for i, kmer in enumerate(threemers):
     vocab[kmer[1:]] = embeddings.iloc[i][1:].to_numpy(dtype="float32")
 
-df = parse_dataset(data, vocab, ecn_level=1, representation='matrix')
+df = parse_dataset(data, vocab, ecn_level=1, representation='vector')
 
 
 firstdig = {}
 for row in df['ec_number']:
-    n = row.split('.')
-    if n[0] not in firstdig:
-        firstdig[n[0]] = 0
+    if row not in firstdig:
+        firstdig[row] = 0
     else:
-        firstdig[n[0]] += 1
+        firstdig[row] += 1
 
 print(firstdig)
 
-
-
-pd.to_pickle(df, 'parsed_data/data.pkl')
+pd.to_pickle(df, 'parsed_data/data_vec1d.pkl')
 

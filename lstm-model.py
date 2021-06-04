@@ -51,8 +51,9 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
 
 model = models.Sequential()
 model.add(Input(shape=(698, 100), dtype='float32', name='main_input'))
-model.add(Bidirectional(LSTM(128)))
+model.add(Bidirectional(LSTM(64, return_sequences=True)))
 model.add(Dropout(0.5))
+model.add(Bidirectional(LSTM(128)))
 model.add(Dense(len(y[0]), activation='softmax'))
 model.compile(optimizer='rmsprop',
               loss='categorical_crossentropy',
