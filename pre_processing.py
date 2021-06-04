@@ -58,7 +58,12 @@ def seq2fixed_vec_matrix(seqs, vocabulary):
             vec_array.append(vocabulary['<unk>'])
     while len(vec_array) < 698:
         vec_array.append(np.array([0.0] * 100))
-    return np.array(vec_array)
+
+    global countline
+    countline += 1
+    if countline % 10 == 0:
+        print(countline)
+    return np.array(vec_array, dtype='float32')
 
 
 def handle_ec_number(ec_number, ecn_level):
@@ -69,7 +74,7 @@ def handle_ec_number(ec_number, ecn_level):
     ret = numbers[0].split('.')[:ecn_level]
     for n in numbers:
         n = n.split('.')[:ecn_level]
-        if ret != n:
+        if ret != n or '-' in n:
             keep = False
     if keep:
         return ','.join(ret)
@@ -78,21 +83,9 @@ def handle_ec_number(ec_number, ecn_level):
 
 
 #  Read datasets
-data = pd.read_csv("ecpred_uniprot_uniref_90.csv").head(500)
+data = pd.read_csv("ecpred_uniprot_uniref_90.csv").sample(n=24000)
 embeddings = pd.read_csv("protVec_100d_3grams.csv", sep='\\t', engine='python', header=None)
 
-'''
-firstdig = {}
-for row in data['ec_number']:
-    n = row.split('.')
-    if n[0] not in firstdig:
-        firstdig[n[0]] = 0
-    else:
-        firstdig[n[0]] += 1
-
-print(firstdig)
-5/0
-'''
 
 
 def parse_dataset(dataset, vocabulary, representation='matrix', maxlen=700, ecn_level=1):
@@ -127,7 +120,20 @@ vocab = {}
 for i, kmer in enumerate(threemers):
     vocab[kmer[1:]] = embeddings.iloc[i][1:].to_numpy(dtype="float32")
 
-df = parse_dataset(data, vocab, ecn_level=2, representation='matrix')
+df = parse_dataset(data, vocab, ecn_level=1, representation='matrix')
 
-pd.to_pickle(df, 'parsed_data/data-micro.pkl')
+
+firstdig = {}
+for row in df['ec_number']:
+    n = row.split('.')
+    if n[0] not in firstdig:
+        firstdig[n[0]] = 0
+    else:
+        firstdig[n[0]] += 1
+
+print(firstdig)
+
+
+
+pd.to_pickle(df, 'parsed_data/data.pkl')
 

@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
 from tensorflow.keras import models
 from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.python.keras import Input
@@ -34,12 +35,17 @@ def get_first_dig(num):
 
 data = pd.read_pickle("parsed_data/data.pkl")
 
-x = data['vectors'].to_numpy()
-x = np.array(x.tolist())
-x = x.astype('float32')
+x = data['vectors'].tolist()
+x = np.array(x, dtype='float32')
 
 
-y = data['ec_number'].apply(get_first_dig).to_numpy()
+y = data['ec_number'].to_numpy()
+
+y = y.reshape(-1, 1)
+enc = OneHotEncoder()
+enc.fit(y)
+y = enc.transform(y).toarray()
+
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
 
@@ -47,9 +53,9 @@ model = models.Sequential()
 model.add(Input(shape=(698, 100), dtype='float32', name='main_input'))
 model.add(Bidirectional(LSTM(128)))
 model.add(Dropout(0.5))
-model.add(Dense(8, activation='softmax'))
+model.add(Dense(len(y[0]), activation='softmax'))
 model.compile(optimizer='rmsprop',
-              loss='sparse_categorical_crossentropy',
+              loss='categorical_crossentropy',
               metrics=['acc'])
 
 model.summary()

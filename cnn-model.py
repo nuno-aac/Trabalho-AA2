@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
 from tensorflow.keras import models
 from tensorflow.keras.layers import Dense
 from tensorflow.python.keras import Input
@@ -13,7 +14,7 @@ import tensorflow as tf
 
 os.environ["CUDA_VISIBLE_DEVICES"] = '3'
 gpus = tf.config.experimental.list_physical_devices('GPU')
-tf.debugging.set_log_device_placement(True)
+# tf.debugging.set_log_device_placement(True)
 if gpus:
     try:
         # Currently, memory growth needs to be the same across GPUs
@@ -27,20 +28,23 @@ if gpus:
         print(e)
 
 
-def get_first_dig(num):
-    r = num.split('.')
-    return int(r[0])
-
-
 print('Reading')
 
 data = pd.read_pickle("parsed_data/data.pkl")
 
-print(data)
+# print(data)
 
-x = data['vectors'].to_numpy()
+x = data['vectors'].tolist()
+x = np.array(x, dtype='float32')
 
-y = data['ec_number'].apply(get_first_dig).to_numpy()
+
+y = data['ec_number'].to_numpy()
+
+y = y.reshape(-1, 1)
+enc = OneHotEncoder()
+enc.fit(y)
+y = enc.transform(y).toarray()
+print(len(y[0]))
 
 print('Splitting data set')
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
@@ -51,10 +55,11 @@ model.add(Conv1D(128, 3, activation='relu'))
 model.add(MaxPooling1D(3))
 model.add(Dropout(0.5))
 model.add(Flatten())
-model.add(Dense(64, activation='sigmoid'))
-model.add(Dense(8, activation='softmax'))
+model.add(Dense(64, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(len(y[0]), activation='softmax'))
 model.compile(optimizer='rmsprop',
-              loss='sparse_categorical_crossentropy',
+              loss='categorical_crossentropy',
               metrics=['acc'])
 
 model.summary()
