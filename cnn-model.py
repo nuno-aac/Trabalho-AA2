@@ -51,18 +51,18 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
 
 model = models.Sequential()
 model.add(Input(shape=(698, 100), dtype='float32', name='main_input'))
-model.add(Conv1D(64, 3, activation='relu'))
-model.add(MaxPooling1D(3))
+model.add(Conv1D(64, 3))
+model.add(MaxPooling1D(3, 2))
 model.add(Dropout(0.1))
-model.add(Conv1D(64, 3, activation='relu'))
-model.add(MaxPooling1D(3))
-model.add(Dropout(0.2))
-model.add(Conv1D(64, 3, activation='relu'))
-model.add(MaxPooling1D(3))
-model.add(Dropout(0.2))
+model.add(Conv1D(64, 3))
+model.add(MaxPooling1D(3, 2))
+model.add(Dropout(0.1))
+model.add(Conv1D(128, 3))
+model.add(MaxPooling1D(3, 2))
+model.add(Dropout(0.1))
 model.add(Flatten())
 model.add(Dense(64, activation='relu'))
-model.add(Dropout(0.5))
+model.add(Dropout(0.1))
 model.add(Dense(len(y[0]), activation='softmax'))
 model.compile(optimizer='rmsprop',
               loss='categorical_crossentropy',
@@ -73,7 +73,7 @@ model.summary()
 print('EVAL')
 
 history = model.fit(x_train, y_train,
-                    epochs=30,
+                    epochs=60,
                     batch_size=128,
                     validation_split=0.2)
 

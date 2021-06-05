@@ -14,7 +14,7 @@ import tensorflow as tf
 
 os.environ["CUDA_VISIBLE_DEVICES"] = '3'
 gpus = tf.config.experimental.list_physical_devices('GPU')
-tf.debugging.set_log_device_placement(True)
+# tf.debugging.set_log_device_placement(True)
 if gpus:
     try:
         # Currently, memory growth needs to be the same across GPUs
@@ -26,11 +26,6 @@ if gpus:
     except RuntimeError as e:
         # Memory growth must be set before GPUs have been initialized
         print(e)
-
-
-def get_first_dig(num):
-    r = num.split('.')
-    return int(r[0])
 
 
 data = pd.read_pickle("parsed_data/data.pkl")
@@ -52,8 +47,9 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
 model = models.Sequential()
 model.add(Input(shape=(698, 100), dtype='float32', name='main_input'))
 model.add(Bidirectional(LSTM(64, return_sequences=True)))
-model.add(Dropout(0.5))
+model.add(Dropout(0.3))
 model.add(Bidirectional(LSTM(128)))
+model.add(Dropout(0.5))
 model.add(Dense(len(y[0]), activation='softmax'))
 model.compile(optimizer='rmsprop',
               loss='categorical_crossentropy',
@@ -62,7 +58,7 @@ model.compile(optimizer='rmsprop',
 model.summary()
 
 history = model.fit(x_train, y_train,
-                    epochs=80,
+                    epochs=60,
                     batch_size=128,
                     validation_split=0.2)
 
