@@ -30,7 +30,7 @@ if gpus:
 
 print('Reading')
 
-data = pd.read_pickle("parsed_data/data.pkl")
+data = pd.read_pickle("parsed_data/data-micro.pkl")
 
 # print(data)
 
@@ -54,15 +54,15 @@ model.add(Input(shape=(698, 100), dtype='float32', name='main_input'))
 model.add(Conv1D(64, 3))
 model.add(MaxPooling1D(3, 2))
 model.add(Dropout(0.1))
-model.add(Conv1D(64, 3))
-model.add(MaxPooling1D(3, 2))
-model.add(Dropout(0.1))
 model.add(Conv1D(128, 3))
 model.add(MaxPooling1D(3, 2))
-model.add(Dropout(0.1))
+model.add(Dropout(0.2))
+model.add(Conv1D(128, 3))
+model.add(MaxPooling1D(3, 2))
+model.add(Dropout(0.3))
 model.add(Flatten())
 model.add(Dense(64, activation='relu'))
-model.add(Dropout(0.1))
+model.add(Dropout(0.3))
 model.add(Dense(len(y[0]), activation='softmax'))
 model.compile(optimizer='rmsprop',
               loss='categorical_crossentropy',

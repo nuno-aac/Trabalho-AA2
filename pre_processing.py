@@ -28,7 +28,7 @@ def seq2fixed_length_vec(seqs, vocabulary):
     countline += 1
     if countline % 10 == 0:
         print(countline)
-
+    print(vec)
     return vec
 
 
@@ -48,7 +48,7 @@ def seq2wordcount_vec(seqs, vocabulary):
     return np.array(wordcount)
 
 
-def seq2fixed_vec_matrix(seqs, vocabulary):
+def seq2fixed_vec_matrix(seqs, vocabulary, maxlen):
     flat_threemers = [item for sublist in seqs for item in sublist]
     vec_array = []
     for t in flat_threemers:
@@ -56,7 +56,7 @@ def seq2fixed_vec_matrix(seqs, vocabulary):
             vec_array.append(vocabulary[t])
         except:
             vec_array.append(vocabulary['<unk>'])
-    while len(vec_array) < 698:
+    while len(vec_array) < maxlen-2:
         vec_array.append(np.array([0.0] * 100))
 
     global countline
@@ -102,8 +102,8 @@ def parse_dataset(dataset, vocabulary, representation='matrix', maxlen=700, ecn_
         dataset = dataset[["ec_number", "vectors"]]
     elif representation == 'vector':
         one_d_vecs = dataset['subsequences'].apply(lambda x: seq2fixed_length_vec(x, vocabulary))
-        dataset = dataset[["ec_number"]]
-        dataset = dataset.join(one_d_vecs)
+        dataset['vectors'] = one_d_vecs
+        dataset = dataset[["ec_number", "vectors"]]
     else:
         raise ValueError('Insert valid representation: "vector", "matrix" or "vocabulary"')
 
@@ -119,17 +119,17 @@ vocab = {}
 for i, kmer in enumerate(threemers):
     vocab[kmer[1:]] = embeddings.iloc[i][1:].to_numpy(dtype="float32")
 
-df = parse_dataset(data, vocab, ecn_level=1, representation='vector')
+df = parse_dataset(data, vocab, ecn_level=2, representation='vector')
 
 
 firstdig = {}
 for row in df['ec_number']:
     if row not in firstdig:
-        firstdig[row] = 0
+        firstdig[row] = 1
     else:
         firstdig[row] += 1
 
 print(firstdig)
 
-pd.to_pickle(df, 'parsed_data/data_vec1d.pkl')
+pd.to_pickle(df, 'parsed_data/data_vec1d2ec.pkl')
 
