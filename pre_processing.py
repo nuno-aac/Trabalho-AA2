@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 import re
 
 countline = 0
@@ -28,7 +29,6 @@ def seq2fixed_length_vec(seqs, vocabulary):
     countline += 1
     if countline % 10 == 0:
         print(countline)
-    print(vec)
     return vec
 
 
@@ -82,18 +82,13 @@ def handle_ec_number(ec_number, ecn_level):
         return None
 
 
-#  Read datasets
-data = pd.read_csv("ecpred_uniprot_uniref_90.csv")
-embeddings = pd.read_csv("protVec_100d_3grams.csv", sep='\\t', engine='python', header=None)
-
-
 def parse_dataset(dataset, vocabulary, representation='matrix', maxlen=700, ecn_level=1):
     dataset = dataset[dataset.get('sequence').notna()]  # Removing null values from sequence column
     dataset = dataset[dataset['sequence'].apply(lambda x: len(x) < maxlen)]  # Removing sequences with length > 1500
     dataset['subsequences'] = sequences2subsequences(dataset.get('sequence'))
 
     if representation == "matrix":
-        matrix = dataset['subsequences'].apply(lambda x: seq2fixed_vec_matrix(x, vocabulary))
+        matrix = dataset['subsequences'].apply(lambda x: seq2fixed_vec_matrix(x, vocabulary, maxlen))
         dataset['vectors'] = matrix
         dataset = dataset[["ec_number", "vectors"]]
     elif representation == 'vocabulary':
@@ -112,6 +107,10 @@ def parse_dataset(dataset, vocabulary, representation='matrix', maxlen=700, ecn_
     return dataset
 
 
+#  Read datasets
+data = pd.read_csv("ecpred_uniprot_uniref_90.csv").head(20000)
+embeddings = pd.read_csv("protVec_100d_3grams.csv", sep='\\t', engine='python', header=None)
+
 #  Build threemer dictionary
 embeddings[100] = embeddings[100].apply(lambda elem: elem[:-1])
 threemers = embeddings.get(0)
@@ -119,7 +118,7 @@ vocab = {}
 for i, kmer in enumerate(threemers):
     vocab[kmer[1:]] = embeddings.iloc[i][1:].to_numpy(dtype="float32")
 
-df = parse_dataset(data, vocab, ecn_level=2, representation='vector')
+df = parse_dataset(data, vocab, ecn_level=1, representation='vector')
 
 
 firstdig = {}
@@ -129,7 +128,13 @@ for row in df['ec_number']:
     else:
         firstdig[row] += 1
 
-print(firstdig)
 
-pd.to_pickle(df, 'parsed_data/data_vec1d2ec.pkl')
+fig1, ax1 = plt.subplots()
+ax1.pie(firstdig.values(), labels=firstdig.keys(), autopct='%1.1f%%',
+        shadow=True, startangle=90)
+ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+plt.show()
+
+# pd.to_pickle(df, 'parsed_data/data_vec1d2ec.pkl')
 
