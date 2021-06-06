@@ -28,7 +28,7 @@ if gpus:
         print(e)
 
 
-data = pd.read_pickle("parsed_data/data.pkl")
+data = pd.read_pickle("parsed_data/data-micro.pkl")
 
 x = data['vectors'].tolist()
 x = np.array(x, dtype='float32')

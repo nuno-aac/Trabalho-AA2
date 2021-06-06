@@ -108,7 +108,7 @@ def parse_dataset(dataset, vocabulary, representation='matrix', maxlen=700, ecn_
 
 
 #  Read datasets
-data = pd.read_csv("ecpred_uniprot_uniref_90.csv").head(20000)
+data = pd.read_csv("ecpred_uniprot_uniref_90.csv")
 embeddings = pd.read_csv("protVec_100d_3grams.csv", sep='\\t', engine='python', header=None)
 
 #  Build threemer dictionary
