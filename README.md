@@ -6,4 +6,6 @@ Notebooks : [Notebooks](https://github.com/nuno-aac/Trabalho-AA2/tree/main/Noteb
 
 Relatório : [Relatório](https://github.com/nuno-aac/Trabalho-AA2/blob/main/Relat%C3%B3rio/Report_AA2.pdf)
 
-Os ficheiros de dados não se encontram incluídos neste repositório
+Os ficheiros de dados não se encontram incluídos neste repositório.
+
+Os restantes scripts foram usados para correr os modelos no servidor mas contem essencialmente a mesma informação que o notebook.
